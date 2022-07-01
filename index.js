@@ -7,16 +7,22 @@ module.exports = function (filename) {
     '-v', 'error',
     '-of', 'flat=s=_',
     '-select_streams', 'v:0',
-    '-show_entries', 'stream=height,width',
+    '-show_entries', 'stream=height,width:side_data=rotation',
+    '-of', 'default=nw=1:nk=1',
     filename
   ]).then(function (out) {
-    var stdout = out[0].toString('utf8');
-    var width = /width=(\d+)/.exec(stdout);
-    var height = /height=(\d+)/.exec(stdout);
+    let stdout = out[0].toString('utf8');
+    stdout = stdout.split('\n');
+    let width = parseInt(stdout[0]);
+    let height = parseInt(stdout[1]);
+    let rotation = parseInt(stdout[2]);
     assert(width && height, 'No dimensions found!');
+    if (rotation && rotation%90===0 && rotation%180===0){
+      [width, height] = [height, width];
+    }
     return {
-      width: parseInt(width[1]),
-      height: parseInt(height[1]),
+      width: width,
+      height: height,
     };
   });
 }
